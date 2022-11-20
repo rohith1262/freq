@@ -1,0 +1,59 @@
+close all;
+clear all;
+load("rec_1m.mat");
+eeg=val(1,:);
+fs=512;
+t=1/fs;
+N=length(eeg);
+tx=[0:N-1]/fs;
+% plotting Original EEG signal
+subplot(2,1,1);
+plot(tx,eeg);
+xlabel("Time ");
+ylabel("Amplitude");
+
+%Zooming into 1-2 sec
+subplot(2,1,2);
+plot(tx,eeg);
+xlabel("Time ");
+ylabel("Amplitude");
+title("Zoomed into 1-2 sec");
+xlim([1,2]);
+
+%welch method-hamming
+mean_val=mean(eeg);
+max_val=max(eeg);
+threshold=(max_val-mean_val)/2;
+[p,f]=pwelch(eeg,hamming(fs),.5*fs,2*fs,fs);
+subplot(4,1,1);
+plot(f,10*log10(p));
+xlabel("freq(hz)");
+ylabel("amplitude(db)");
+title("pwelch method");
+
+% welch zoomed into 60hz
+subplot(4,1,2);
+plot(f,10*log10(p));
+xlabel("freq(hz)");
+ylabel("amplitude(db)");
+title("pwelch method- zoomed into 60hz");
+xlim([0,60]);
+
+%periodogram method
+[pxx,f]=periodogram(eeg,hamming(N),N,fs,'power');
+[pwrest,idx]=max(pxx);
+fprintf("The maximum power occurs at %f",f(idx));
+fprintf("\nThe power spectral density is %f",pwrest);
+subplot(4,2,3);
+plot(f,10*log10(pxx));
+xlabel("freq(hz)");
+ylabel("amplitude(db)");
+title("periodogram method");
+
+%periodogram zooming into 0-60hz...
+subplot(4,2,4);
+plot(f,10*log10(pxx));
+xlabel("freq(hz)");
+ylabel("amplitude(db)");
+title("periodogram method zoomed into 60hz");
+xlim([0,60]);
